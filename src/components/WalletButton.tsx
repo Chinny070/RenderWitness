@@ -55,9 +55,12 @@ export default function WalletButton() {
   };
 
   const connectImported = () => {
-    const trimmed = importKey.trim();
+    let trimmed = importKey.trim();
+    if (/^[0-9a-fA-F]{64}$/.test(trimmed)) {
+      trimmed = "0x" + trimmed;
+    }
     if (!isValidPk(trimmed)) {
-      setImportError("Invalid key. Must be 0x followed by 64 hex characters.");
+      setImportError("Invalid key. Enter 64 hex characters (with or without 0x prefix).");
       return;
     }
     localStorage.setItem(STORAGE_KEY, trimmed);
