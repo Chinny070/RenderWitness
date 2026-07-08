@@ -39,10 +39,11 @@ export async function submitClaim(
     functionName: "submit_claim",
     args: [claimType, title, statement, sourceUrl, sourceHint, expectedValue],
     account: account,
+    value: BigInt(0),
   });
   const receipt = await client.waitForTransactionReceipt({
     hash: txHash,
-    status: "ACCEPTED",
+    status: "ACCEPTED" as any,
   });
   return String(receipt.data ?? txHash);
 }
@@ -54,10 +55,11 @@ export async function verifyClaim(claimId: string): Promise<string> {
     functionName: "verify_claim",
     args: [Number(claimId)],
     account: account,
+    value: BigInt(0),
   });
   const receipt = await client.waitForTransactionReceipt({
     hash: txHash,
-    status: "ACCEPTED",
+    status: "ACCEPTED" as any,
   });
   return String(receipt.data ?? txHash);
 }
@@ -73,10 +75,11 @@ export async function challengeResult(
     functionName: "challenge_result",
     args: [Number(claimId), reason, alternateUrl],
     account: account,
+    value: BigInt(0),
   });
   const receipt = await client.waitForTransactionReceipt({
     hash: txHash,
-    status: "ACCEPTED",
+    status: "ACCEPTED" as any,
   });
   return String(receipt.data ?? txHash);
 }
