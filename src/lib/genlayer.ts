@@ -8,7 +8,7 @@ const CONTRACT_ADDRESS =
   (process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? "") as `0x${string}`;
 const RPC_URL = process.env.NEXT_PUBLIC_GENLAYER_RPC_URL ?? "https://studio.genlayer.com/api";
 
-const account = createAccount();
+const STORAGE_KEY = "rw_wallet_pk";
 
 const chain = {
   ...studionet,
@@ -17,10 +17,18 @@ const chain = {
   },
 };
 
-const client = createClient({
-  chain,
-  account: account,
-});
+function getAccount() {
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return createAccount(stored as `0x${string}`);
+  }
+  return createAccount();
+}
+
+function getClient() {
+  const account = getAccount();
+  return createClient({ chain, account });
+}
 
 export async function submitClaim(
   claimType: string,
@@ -34,11 +42,13 @@ export async function submitClaim(
     const id = String(MOCK_CLAIMS.length);
     return id;
   }
+  const client = getClient();
+  const account = getAccount();
   const txHash = await client.writeContract({
     address: CONTRACT_ADDRESS,
     functionName: "submit_claim",
     args: [claimType, title, statement, sourceUrl, sourceHint, expectedValue],
-    account: account,
+    account,
     value: BigInt(0),
   });
   const receipt = await client.waitForTransactionReceipt({
@@ -50,11 +60,13 @@ export async function submitClaim(
 
 export async function verifyClaim(claimId: string): Promise<string> {
   if (IS_MOCK) return "";
+  const client = getClient();
+  const account = getAccount();
   const txHash = await client.writeContract({
     address: CONTRACT_ADDRESS,
     functionName: "verify_claim",
     args: [Number(claimId)],
-    account: account,
+    account,
     value: BigInt(0),
   });
   const receipt = await client.waitForTransactionReceipt({
@@ -70,11 +82,13 @@ export async function challengeResult(
   alternateUrl: string
 ): Promise<string> {
   if (IS_MOCK) return "";
+  const client = getClient();
+  const account = getAccount();
   const txHash = await client.writeContract({
     address: CONTRACT_ADDRESS,
     functionName: "challenge_result",
     args: [Number(claimId), reason, alternateUrl],
-    account: account,
+    account,
     value: BigInt(0),
   });
   const receipt = await client.waitForTransactionReceipt({
@@ -89,6 +103,7 @@ export async function getClaim(
 ): Promise<ClaimPacket | null> {
   if (IS_MOCK) return getMockClaim(claimId);
   try {
+    const client = getClient();
     const raw = await client.readContract({
       address: CONTRACT_ADDRESS,
       functionName: "get_claim",
@@ -105,6 +120,7 @@ export async function getResult(
 ): Promise<ResultPacket | null> {
   if (IS_MOCK) return getMockResult(claimId);
   try {
+    const client = getClient();
     const raw = await client.readContract({
       address: CONTRACT_ADDRESS,
       functionName: "get_result",
@@ -122,6 +138,7 @@ export async function getStatus(claimId: string): Promise<string> {
     return claim?.status ?? "unknown";
   }
   try {
+    const client = getClient();
     const raw = await client.readContract({
       address: CONTRACT_ADDRESS,
       functionName: "get_status",
@@ -135,6 +152,7 @@ export async function getStatus(claimId: string): Promise<string> {
 
 export async function getAllClaims(): Promise<ClaimPacket[]> {
   if (IS_MOCK) return MOCK_CLAIMS;
+  const client = getClient();
   const claims: ClaimPacket[] = [];
   let id = 0;
   while (true) {
@@ -157,4 +175,4 @@ export function getExplorerUrl(txHash: string): string {
   return `https://studio.genlayer.com/explorer/tx/${txHash}`;
 }
 
-export { account, client };
+export { getAccount, getClient };
