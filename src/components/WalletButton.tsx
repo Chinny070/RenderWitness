@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createAccount } from "genlayer-js";
 
 const STORAGE_KEY = "rw_wallet_pk";
 const MODE_KEY = "rw_wallet_mode";
@@ -13,9 +14,9 @@ function generateHexKey(): string {
   );
 }
 
-function pkToAddress(pk: string): string {
-  const hash = pk.slice(2, 42);
-  return "0x" + hash;
+function getAddressFromPk(pk: string): string {
+  const account = createAccount(pk as `0x${string}`);
+  return account.address;
 }
 
 function isValidPk(pk: string): boolean {
@@ -36,7 +37,7 @@ export default function WalletButton() {
     const stored = localStorage.getItem(STORAGE_KEY);
     const mode = localStorage.getItem(MODE_KEY);
     if (stored) {
-      setAddress(pkToAddress(stored));
+      setAddress(getAddressFromPk(stored));
       setWalletMode(mode === "imported" ? "imported" : "auto");
     }
   }, []);
@@ -48,7 +49,7 @@ export default function WalletButton() {
     }
     localStorage.setItem(STORAGE_KEY, pk);
     localStorage.setItem(MODE_KEY, "auto");
-    setAddress(pkToAddress(pk));
+    setAddress(getAddressFromPk(pk));
     setWalletMode("auto");
     setShowConnectMenu(false);
     window.dispatchEvent(new Event("rw_wallet_connected"));
@@ -65,7 +66,7 @@ export default function WalletButton() {
     }
     localStorage.setItem(STORAGE_KEY, trimmed);
     localStorage.setItem(MODE_KEY, "imported");
-    setAddress(pkToAddress(trimmed));
+    setAddress(getAddressFromPk(trimmed));
     setWalletMode("imported");
     setShowImport(false);
     setShowConnectMenu(false);
