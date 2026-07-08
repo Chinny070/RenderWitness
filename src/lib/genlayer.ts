@@ -51,25 +51,29 @@ export async function submitClaim(
     account,
     value: BigInt(0),
   });
-  const receipt = await client.waitForTransactionReceipt({
+  await client.waitForTransactionReceipt({
     hash: txHash,
     status: "ACCEPTED" as any,
   });
-  return extractReturnValue(receipt, txHash);
+  const claimId = await findLatestClaimId(client);
+  return claimId;
 }
 
-function extractReturnValue(receipt: any, fallback: string): string {
-  console.log("[RenderWitness] receipt:", JSON.stringify(receipt, null, 2));
-  if (receipt?.data !== undefined && receipt?.data !== null) {
-    const d = receipt.data;
-    if (typeof d === "string" || typeof d === "number" || typeof d === "bigint") return String(d);
-    if (typeof d === "object") {
-      const val = d.result ?? d.return_value ?? d.value ?? Object.values(d)[0];
-      if (val !== undefined && val !== null) return String(val);
-      return JSON.stringify(d);
+async function findLatestClaimId(client: any): Promise<string> {
+  let id = 0;
+  while (true) {
+    try {
+      await client.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: "get_claim",
+        args: [id],
+      });
+      id++;
+    } catch {
+      break;
     }
   }
-  return fallback;
+  return String(Math.max(0, id - 1));
 }
 
 export async function verifyClaim(claimId: string): Promise<string> {
@@ -83,11 +87,11 @@ export async function verifyClaim(claimId: string): Promise<string> {
     account,
     value: BigInt(0),
   });
-  const receipt = await client.waitForTransactionReceipt({
+  await client.waitForTransactionReceipt({
     hash: txHash,
     status: "ACCEPTED" as any,
   });
-  return extractReturnValue(receipt, txHash);
+  return txHash;
 }
 
 export async function challengeResult(
@@ -105,11 +109,11 @@ export async function challengeResult(
     account,
     value: BigInt(0),
   });
-  const receipt = await client.waitForTransactionReceipt({
+  await client.waitForTransactionReceipt({
     hash: txHash,
     status: "ACCEPTED" as any,
   });
-  return extractReturnValue(receipt, txHash);
+  return txHash;
 }
 
 export async function getClaim(
