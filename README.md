@@ -5,7 +5,7 @@
 RenderWitness turns live web sources into consensus-backed, on-chain proof. Submit a factual claim about what a public webpage says, and GenLayer validators independently fetch the page, evaluate your claim, and reach consensus on whether the source supports it.
 
 **Live app:** https://render-witness.vercel.app  
-**Contract:** Deployed on GenLayer Studionet at `0x2440E7C1117Fe12FE711F6e5001202A247a49a50`  
+**Contract:** Deployed on GenLayer Studionet at `0x2d7741CDd170E9994aDF14FE5C30DBDa51E9b39B`  
 **Repo:** https://github.com/Chinny070/RenderWitness
 
 ---
