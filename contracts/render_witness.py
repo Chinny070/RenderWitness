@@ -145,8 +145,7 @@ class RenderWitness(gl.Contract):
         )
 
         def call_llm() -> str:
-            web_data = gl.nondet.web.get(source_url)
-            page_content = web_data.body.decode("utf-8")
+            page_content = gl.nondet.web.render(source_url, mode='text')
 
             full_prompt = prompt + "\n\nFetched source content:\n" + page_content
             result = gl.nondet.exec_prompt(full_prompt)
@@ -244,8 +243,7 @@ class RenderWitness(gl.Contract):
         )
 
         def call_llm() -> str:
-            web_data = gl.nondet.web.get(source_url)
-            page_content = web_data.body.decode("utf-8")
+            page_content = gl.nondet.web.render(source_url, mode='text')
 
             full_prompt = prompt + "\n\nFetched source content:\n" + page_content
             result = gl.nondet.exec_prompt(full_prompt)
